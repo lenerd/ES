@@ -12,25 +12,6 @@ void TC6_Handler (void)
     uint32_t status;
     status = TC2->TC_CHANNEL[0].TC_SR;
 
-    // ++t_cnt;
-    // if (t_cnt > 1)
-    // {
-    //     if (next_state == HIGH)
-    //     {
-    //         brightness = 255;
-    //         next_state = LOW;
-    //         t_cnt = 0;
-    //     }
-    //     else
-    //     {
-    //         brightness = 0;
-    //         next_state = HIGH;
-    //         t_cnt = 0;
-    //     }
-    // }
-    // Serial.println("foo");
-    // return;
-
     if (digitalRead(t1_pin) == LOW)
     {
         if (t_id != 1)
@@ -39,7 +20,7 @@ void TC6_Handler (void)
             t_cnt = 0;
         }
         ++t_cnt;
-        if (t_cnt >= 32)
+        if (t_cnt >= 100)
         {
             brightness += 5;
             t_cnt = 0;
@@ -53,7 +34,7 @@ void TC6_Handler (void)
             t_cnt = 0;
         }
         ++t_cnt;
-        if (t_cnt >= 32)
+        if (t_cnt >= 100)
         {
             brightness -= 5;
             t_cnt = 0;
@@ -88,8 +69,6 @@ void setup()
     pinMode(t2_pin, INPUT);
     TC_Start(TC2, 0);
     Serial.begin(9600);
-    Serial.println("blubb\n");
-    // Serial.println("blubb\n");
 }
 
 void loop()
