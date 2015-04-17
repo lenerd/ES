@@ -2,8 +2,8 @@ const int led_pin = 7;
 const int t1_pin = 5;
 const int t2_pin = 3;
 
-volatile uint8_t t_cnt = 0;
-volatile uint8_t t_id = 0;
+volatile uint8_t t1_cnt = 0;
+volatile uint8_t t2_cnt = 0;
 volatile uint8_t brightness = 100;
 volatile bool next_state = LOW;
 
@@ -14,35 +14,29 @@ void TC6_Handler (void)
 
     if (digitalRead(t1_pin) == LOW)
     {
-        if (t_id != 1)
-        {
-            t_id = 1;
-            t_cnt = 0;
-        }
-        ++t_cnt;
-        if (t_cnt >= 100)
+        ++t1_cnt;
+        if (t1_cnt >= 100)
         {
             brightness += 5;
-            t_cnt = 0;
-        }
-    }
-    else if (digitalRead(t2_pin) == LOW)
-    {
-        if (t_id != 2)
-        {
-            t_id = 2;
-            t_cnt = 0;
-        }
-        ++t_cnt;
-        if (t_cnt >= 100)
-        {
-            brightness -= 5;
-            t_cnt = 0;
+            t1_cnt = 0;
         }
     }
     else
     {
-        t_cnt = 0;
+        t1_cnt = 0;
+    }
+    if (digitalRead(t2_pin) == LOW)
+    {
+        ++t2_cnt;
+        if (t2_cnt >= 100)
+        {
+            brightness -= 5;
+            t2_cnt = 0;
+        }
+    }
+    else
+    {
+        t2_cnt = 0;
     }
 }
 
