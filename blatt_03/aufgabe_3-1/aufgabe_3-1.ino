@@ -33,7 +33,7 @@ void setup() {
     cmr8_val |= TC_CMR_WAVE;         /* waveform mode */
     cmr8_val |= TC_CMR_WAVSEL_UP_RC; /* counting up until eq RC */
     cmr8_val |= TC_CMR_TCCLKS_TIMER_CLOCK3; /* MCK/32 */
-    TC2->TC_CHANNEL[2].TC_RC = 2625; /* set RC val */
+    TC2->TC_CHANNEL[2].TC_RC = 262500; /* set RC val */
     TC_Configure(TC2, 2, cmr8_val);
     TC2->TC_CHANNEL[2].TC_IER = TC_IER_CPCS; /* enable rc cmp interrupt */
     TC2->TC_CHANNEL[2].TC_IDR = ~TC_IER_CPCS; /* not disable rc cmp interrupt */
@@ -56,8 +56,12 @@ void setup() {
     vref_val = 0x3ff & analogRead(vref_pin);
     x45out_val = 0x3ff & analogRead(x45out_pin);
     z45out_val = 0x3ff & analogRead(z45out_pin);
-    // x_cal = (x45out_val - vref_val) / 9.1;
-    // z_cal = (z45out_val- vref_val) / 9.1;
+    delay(3);
+    x_cal = (x45out_val - vref_val) / 9.1;
+    z_cal = (z45out_val- vref_val) / 9.1;
+    delay(3);
+    x_cal = (x45out_val - vref_val) / 9.1;
+    z_cal = (z45out_val- vref_val) / 9.1;
 
     Serial.begin(9600);
     Serial.println("setup done");
@@ -65,20 +69,21 @@ void setup() {
 
 void loop() {
     delay(200);
-    // digitalWrite(az_pin, HIGH);
-    // delay(1);
-    // digitalWrite(az_pin, LOW);
-    // delay(7);
+    digitalWrite(az_pin, HIGH);
+    delay(1);
+    digitalWrite(az_pin, LOW);
+    delay(7);
     x_val = (x45out_val - vref_val) / 9.1 - x_cal;
     z_val = (z45out_val- vref_val) / 9.1 - z_cal;
+    Serial.print("vref: ");
     Serial.print(vref_val);
-    Serial.print(' ');
-    Serial.print(x45out_val);
-    Serial.print(' ');
-    Serial.print(z45out_val);
-    Serial.print(' ');
+    // Serial.print(' ');
+    // Serial.print(x45out_val);
+    // Serial.print(' ');
+    // Serial.print(z45out_val);
+    Serial.print("  x: ");
     Serial.print(x_val);
-    Serial.print(' ');
+    Serial.print("  z: ");
     Serial.print(z_val);
-    Serial.println("");
+    Serial.print('\n');
 }
