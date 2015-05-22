@@ -4,24 +4,26 @@ const uint8_t az_pin = 2;
 const uint8_t x45out_pin = A2;
 const uint8_t z45out_pin = A3;
 
+/* values in mv */
+double vref_mv;
+double x_mv;
+double z_mv;
 
-uint16_t vref_val = 0;
-uint16_t x45out_val = 0;
-uint16_t z45out_val = 0;
 double x_val = 0;
 double z_val = 0;
 double x_cal = 0;
 double z_cal = 0;
 
+uint8_t az_cnt = 0;
 
 void TC8_Handler (void)
 { 
     uint32_t status;
     status = TC2->TC_CHANNEL[2].TC_SR;
 
-    vref_val = 0x3ff & analogRead(vref_pin);
-    x45out_val = 0x3ff & analogRead(x45out_pin);
-    z45out_val = 0x3ff & analogRead(z45out_pin);
+    vref_mv = analogRead(vref_pin) * 5000.0/1024.0;
+    x_mv = analogRead(x45out_pin) * 5000.0/1024.0;
+    z_mv = analogRead(z45out_pin) * 5000.0/1024.0;
 
 }
 void setup() {
@@ -53,15 +55,12 @@ void setup() {
 
     digitalWrite(az_pin, LOW);
 
-    vref_val = 0x3ff & analogRead(vref_pin);
-    x45out_val = 0x3ff & analogRead(x45out_pin);
-    z45out_val = 0x3ff & analogRead(z45out_pin);
-    delay(3);
-    x_cal = (x45out_val - vref_val) / 9.1;
-    z_cal = (z45out_val- vref_val) / 9.1;
-    delay(3);
-    x_cal = (x45out_val - vref_val) / 9.1;
-    z_cal = (z45out_val- vref_val) / 9.1;
+    delay(6);
+    vref_mv = analogRead(vref_pin) * 5000.0/1024.0;
+    x_mv = analogRead(x45out_pin) * 5000.0/1024.0;
+    z_mv = analogRead(z45out_pin) * 5000.0/1024.0;
+    x_cal = (x_mv - vref_mv) / 9.1;
+    z_cal = (z_mv - vref_mv) / 9.1;
 
     Serial.begin(9600);
     Serial.println("setup done");
@@ -69,18 +68,26 @@ void setup() {
 
 void loop() {
     delay(200);
-    digitalWrite(az_pin, HIGH);
-    delay(1);
-    digitalWrite(az_pin, LOW);
-    delay(7);
-    x_val = (x45out_val - vref_val) / 9.1 - x_cal;
-    z_val = (z45out_val- vref_val) / 9.1 - z_cal;
+    // if (az_cnt < 10)
+    // {
+    //     ++az_cnt;
+    // }
+    // else
+    // {
+    //     digitalWrite(az_pin, HIGH);
+    //     delay(1);
+    //     digitalWrite(az_pin, LOW);
+    //     delay(7);
+    //     az_cnt = 0;
+    // }
+    x_val = (x_mv - vref_mv) / 9.1 - x_cal;
+    z_val = (z_mv - vref_mv) / 9.1 - z_cal;
     Serial.print("vref: ");
-    Serial.print(vref_val);
-    // Serial.print(' ');
-    // Serial.print(x45out_val);
-    // Serial.print(' ');
-    // Serial.print(z45out_val);
+    Serial.print(vref_mv);
+    Serial.print(' ');
+    Serial.print(x_mv);
+    Serial.print(' ');
+    Serial.print(z_mv);
     Serial.print("  x: ");
     Serial.print(x_val);
     Serial.print("  z: ");
