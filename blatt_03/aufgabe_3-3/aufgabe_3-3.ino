@@ -73,7 +73,7 @@ void TC8_Handler (void)
     // z_val = z_current();
     vref_mv = analogRead(vref_pin) * 5000.0/1024.0;
     z_mv = analogRead(z45out_pin) * 5000.0/1024.0;
-    z_val = ((z_mv - vref_mv) / 9.1 - z_cal) / 40;
+    z_val = ((z_mv - vref_mv) / 9.1 - z_cal) / 40; /* Faktor ? */
 
     
     // if (abs(z_val) < 1.5)
