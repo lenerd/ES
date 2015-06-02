@@ -21,31 +21,8 @@ double z_cal = 0;
 
 uint8_t az_cnt = 0;
 
-const uint8_t buf_len = 1;
-double zval_buf[buf_len];
-uint8_t buf_i = 0;
-
 bool led_on = false;
 uint8_t led_cnt = 0;
-
-
-// void z_measure (void)
-// {
-//     vref_mv = analogRead(vref_pin) * 5000.0/1024.0;
-//     z_mv = analogRead(z45out_pin) * 5000.0/1024.0;
-//     z_val = ((z_mv - vref_mv) / 9.1 - z_cal) / 10;
-//     zval_buf[buf_i] = z_val;
-//     buf_i = (buf_i + 1) % buf_len;
-// }
-// 
-// double z_current (void)
-// {
-//     double val = 0.0;
-//     for (int i = 0; i < buf_len; ++i)
-//         val += zval_buf[i];
-//     val /= buf_len;
-//     return val;
-// }
 
 
 void TC7_Handler (void)
@@ -69,18 +46,11 @@ void TC8_Handler (void)
     uint32_t status;
     status = TC2->TC_CHANNEL[2].TC_SR;
 
-    // z_measure();
-    // z_val = z_current();
     vref_mv = analogRead(vref_pin) * 5000.0/1024.0;
     z_mv = analogRead(z45out_pin) * 5000.0/1024.0;
     z_val = ((z_mv - vref_mv) / 9.1 - z_cal) / 40; /* Faktor ? */
 
     
-    // if (abs(z_val) < 1.5)
-    // {
-    //     z_val = 0;
-    //     return;
-    // }
     angle = angle + z_val;
     if (angle < 25)
     {
@@ -148,28 +118,12 @@ void setup() {
     servo.attach(servo_pin);
     servo.write(90);
 
-    /* init ringbuffer */
-    // for (uint8_t i = 0; i < buf_len; ++i)
-    //     z_measure();
-
     Serial.begin(9600);
     Serial.println("setup done");
 }
 
 void loop() {
     delay(200);
-    // if (az_cnt < 10)
-    // {
-    //     ++az_cnt;
-    // }
-    // else
-    // {
-    //     digitalWrite(az_pin, HIGH);
-    //     delay(1);
-    //     digitalWrite(az_pin, LOW);
-    //     delay(7);
-    //     az_cnt = 0;
-    // }
     Serial.print("vref: ");
     Serial.print(vref_mv);
     Serial.print("  z: ");
