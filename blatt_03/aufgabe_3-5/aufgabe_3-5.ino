@@ -9,7 +9,8 @@ const uint8_t min_angle = 25;
 const uint8_t max_angle = 155;
 
 int8_t bite;
-uint8_t state;
+int8_t state;
+
 
 
 void setup()
@@ -24,6 +25,14 @@ void setup()
     angle = 0;
 }
 
+void error (void)
+{
+    Serial.println("Use a command of the following form 'moveTo(\\d{1,3})'");
+    while (bite != '\n')
+        bite = Serial.read();
+    state = 0;
+}
+
 void loop()
 {
     while ((bite = Serial.read()) != -1)
@@ -35,70 +44,49 @@ void loop()
                 if (bite == 'm')
                     state = 1;
                 else
-                {
-                    state = 0;
-                    Serial.println(" 0: ^moveTo(\\d{1,3})$");
-                }
+                    error();
                 break;
 
             case 1:
                 if (bite == 'o')
                     state = 2;
                 else
-                {
-                    state = 0;
-                    Serial.println(" 1: ^moveTo(\\d{1,3})$");
-                }
+                    error();
                 break;
 
             case 2:
                 if (bite == 'v')
                     state = 3;
                 else
-                {
-                    state = 0;
-                    Serial.println(" 2: ^moveTo(\\d{1,3})$");
-                }
+                    error();
                 break;
 
             case 3:
                 if (bite == 'e')
                     state = 4;
                 else
-                {
-                    state = 0;
-                    Serial.println(" 3: ^moveTo(\\d{1,3})$");
-                }
+                    error();
                 break;
 
             case 4:
                 if (bite == 'T')
                     state = 5;
                 else
-                {
-                    state = 0;
-                    Serial.println(" 4: ^moveTo(\\d{1,3})$");
-                }
+                    error();
                 break;
 
             case 5:
                 if (bite == 'o')
                     state = 6;
                 else
-                {
-                    state = 0;
-                    Serial.println(" 5: ^moveTo(\\d{1,3})$");
-                }
+                    error();
                 break;
 
             case 6:
                 if (bite == '(')
                     state = 7;
                 else
-                {
-                    state = 0;
-                    Serial.println(" 6: ^moveTo(\\d{1,3})$");
-                }
+                    error();
                 break;
 
             case 7:
@@ -108,12 +96,7 @@ void loop()
                     state = 8;
                 }
                 else
-                {
-                    state = 0;
-                    Serial.print(bite);
-                    Serial.print(" ");
-                    Serial.println(" 7: ^moveTo(\\d{1,3})$");
-                }
+                    error();
                 break;
 
             case 8:
@@ -124,21 +107,10 @@ void loop()
                 }
                 else if (bite == ')')
                 {
-                    if (angle >= 25 && angle <= 155)
-                    {
-                        servo.write(angle);
-                        Serial.print(angle);
-                        Serial.println(" °");
-                    }
-                    else
-                        Serial.println("use values between 25 and 155");
-                    state = 0;
+                    state = 11;
                 }
                 else
-                {
-                    state = 0;
-                    Serial.println(" 8: ^moveTo(\\d{1,3})$");
-                }
+                    error();
                 break;
 
             case 9:
@@ -149,46 +121,40 @@ void loop()
                 }
                 else if (bite == ')')
                 {
-                    if (angle >= 25 && angle <= 155)
-                    {
-                        servo.write(angle);
-                        Serial.print(angle);
-                        Serial.println(" °");
-                    }
-                    else
-                        Serial.println("use values between 25 and 155");
-                    state = 0;
+                    state = 11;
                 }
                 else
-                {
-                    state = 0;
-                    Serial.println(" 9: ^moveTo(\\d{1,3})$");
-                }
+                    error();
                 break;
 
             case 10:
                 if (bite == ')')
                 {
+                    state = 11;
+                }
+                else
+                    error();
+                break;
+
+            case 11:
+                if (bite == '\n')
+                {
                     if (angle >= 25 && angle <= 155)
                     {
                         servo.write(angle);
                         Serial.print(angle);
-                        Serial.println(" °");
+                        Serial.println(" degree");
                     }
                     else
                         Serial.println("use values between 25 and 155");
                     state = 0;
                 }
                 else
-                {
-                    state = 0;
-                    Serial.println("10: ^moveTo(\\d{1,3})$");
-                }
-                break;
+                    error();
 
             default:
                 break;
         }
-        Serial.println(state);
+        // Serial.println(state);
     }
 }
