@@ -75,6 +75,7 @@ void setup (void) {
 
     /* configure i/o pins */
     pinMode(led_pin, OUTPUT);
+    digitalWrite(led_pin, LOW);
 
 
     Serial.begin(9600);

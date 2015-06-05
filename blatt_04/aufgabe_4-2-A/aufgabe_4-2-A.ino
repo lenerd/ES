@@ -8,7 +8,7 @@ const uint8_t msg_off = 0x2;
 const uint8_t adr_slave = 0x02;
 
 volatile bool scomm = false;
-volatile bool next = msg_on;
+volatile uint8_t next = msg_on;
 
 
 void TC7_Handler (void)
@@ -53,24 +53,34 @@ void setup (void) {
 }
 
 
+void print_status(uint8_t bite)
+{
+    if (bite == msg_on)
+        Serial.println("status: on");
+    else if (bite == msg_off)
+        Serial.println("status: off");
+    else
+        Serial.println("status: unknown");
+}
+
+
 void loop (void)
 {
     uint8_t bite;
 
     if (scomm)
     {
+        scomm = false;
         if (next == msg_on)
         {
             Wire.beginTransmission(adr_slave);
             Wire.write(msg_on);
             Wire.endTransmission();
             Serial.println("sent msg_on");
-            Wire.requestFrom(adr_slave, 1);
+            Wire.requestFrom(adr_slave, (uint8_t)1);
             while (Wire.available() != 1);
             bite = Wire.read();
-            Serial.print("status: ");
-            Serial.print(bite);
-            Serial.print("\n");
+            print_status(bite);
         }
         else
         {
@@ -78,12 +88,10 @@ void loop (void)
             Wire.write(msg_off);
             Wire.endTransmission();
             Serial.println("sent msg_off");
-            Wire.requestFrom(adr_slave, 1);
+            Wire.requestFrom(adr_slave, (uint8_t)1);
             while (Wire.available() != 1);
             bite = Wire.read();
-            Serial.print("status: ");
-            Serial.print(bite);
-            Serial.print("\n");
+            print_status(bite);
         }
     }
 }
