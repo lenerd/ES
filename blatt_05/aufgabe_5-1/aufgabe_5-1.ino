@@ -10,16 +10,22 @@ uint8_t lcd_buf[6][84];
 void set_pixel (uint8_t x, uint8_t y, int value)
 {
     if (value)
-        lcd_buf[x / 8][y] |= 1 << (x % 8);
+        lcd_buf[y / 8][x] |= 1 << (y % 8);
     else
-        lcd_buf[x / 8][y] &= ~(1 << (x % 8));
+        lcd_buf[y / 8][x] &= ~(1 << (y % 8));
 }
 
 void buffer_to_lcd (void)
 {
-    for (uint8_t i = 0; i < 6; ++i)
-        for (uint8_t j = 0; j < 84; ++j)
-            SPI.transfer(ss_pin, lcd_buf[i][j]);
+    for (uint8_t y = 0; y < 6; ++y)
+        for (uint8_t x = 0; x < 84; ++x)
+            SPI.transfer(ss_pin, lcd_buf[y][x]);
+}
+
+void invert_col (uint8_t x)
+{
+    for (uint8_t y = 0; y < 6; ++y)
+        lcd_buf[y][x] = ~lcd_buf[y][x];
 }
 
 void setup() {
