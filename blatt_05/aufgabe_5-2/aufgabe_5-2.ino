@@ -1,5 +1,7 @@
 #include <SPI.h>
 
+extern unsigned char font[95][6];
+
 /* pins */
 const uint8_t rst_pin = 6;
 const uint8_t dc_pin = 5;
@@ -28,6 +30,32 @@ void invert_col (uint8_t x)
         lcd_buf[y][x] = ~lcd_buf[y][x];
 }
 
+int print_char(int x, int y, char value)
+{
+    if(!(x >= 0 && x <= 78 && y >= 0 && y < 40))
+    {
+        return -1;
+    }
+    for(int i= 0; i < 6; ++i)
+    {
+      int start = y / 8;
+      int shift = y % 8;
+      uint16_t tmp = (lcd_buf[start+1][x+i] << 8) || lcd_buf[start][x+i];
+      uint16_t f = font[value][i];
+      tmp &= ~(0xff << shift);
+      tmp |= f << shift;  
+      uint8_t* foo = (uint8_t*) &tmp;
+      lcd_buf[start][x+i] = foo[0];
+      lcd_buf[start+1][x+i] = foo[1];
+    }
+    return 0;
+}
+void test (void)
+{
+    print_char(39, 20, 32);
+    buffer_to_lcd();
+}
+
 void setup() {
   pinMode(rst_pin, OUTPUT);
   pinMode(dc_pin, OUTPUT);
@@ -47,25 +75,15 @@ void setup() {
   SPI.transfer(ss_pin, 0x20);
   SPI.transfer(ss_pin, 0x0C);
 
-  // setram address
+  // set ram address
   SPI.transfer(ss_pin, 0x80);
   SPI.transfer(ss_pin, 0x40);
 
 
   /* data mode */
   digitalWrite(dc_pin, HIGH);
-  set_pixel(0, 0, 1);
-  // set_pixel(38, 30, 1);
-  //buffer_to_lcd();
+  test();
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-	for (uint8_t x = 0; x < 84; ++x)
-	{
-	    invert_col(x);
-	    buffer_to_lcd();
-	    delay(200);
-	}
-
 }
