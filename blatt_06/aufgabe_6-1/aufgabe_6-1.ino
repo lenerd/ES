@@ -11,6 +11,7 @@ uint8_t lcd_buf[6][84];
 
 const uint32_t max_filename_len = 255;
 char filename_buf[256];
+char bite;
 uint32_t state = 0;
 uint32_t fn_index = 0;
 
@@ -34,11 +35,6 @@ void invert_col (uint8_t x)
 {
     for (uint8_t y = 0; y < 6; ++y)
         lcd_buf[y][x] = ~lcd_buf[y][x];
-}
-
-void error (void)
-{
-    Serial.println("o.0");
 }
 
 void setup() {
@@ -74,5 +70,132 @@ void setup() {
   Serial.begin(9600);
 }
 
+void error (void)
+{
+    Serial.println(state);
+    Serial.println(bite);
+    Serial.println("bitte geben Sie einen gültigen Befehl ein");
+    while (bite != '\n')
+        bite = Serial.read();
+    state = 0;
+
+}
+
 void loop() {
+    int command = 0;
+    int count_buf = 0;
+    while ((bite = Serial.read()) != -1)
+    {
+        switch(state)
+        {
+            case 0:
+                memset(filename_buf, 0x0, 256);
+                if (bite == 'e')
+                    state = 11;
+                else if (bite == 's')
+                    state = 21;
+                else
+                    error();
+                break;
+
+            case 11:
+                if (bite == 'x')
+                    state = 12;
+                else
+                    error();
+                break;
+
+            case 12:
+                if (bite == 'i')
+                    state = 13;
+                else
+                    error();
+                break;
+
+            case 13:
+                if (bite == 's')
+                    state = 14;
+                else
+                    error();
+                break;
+
+            case 14:
+                if (bite == 't')
+                    state = 15;
+                else
+                    error();
+                break;
+
+            case 15:
+                if (bite == 's')
+                    state = 16;
+                else
+                    error();
+                break;
+
+            case 16:
+                if (bite == ' ')
+                    {
+                        state = 3;
+                        command = 1;
+                    }
+                else
+                    error();
+                break;
+
+            case 21:
+                if (bite == 'h')
+                    state = 22;
+                else
+                    error();
+                break;
+
+            case 22:
+                if (bite == 'o')
+                    state = 23;
+                else
+                    error();
+                break;
+
+            case 23:
+                if (bite == 'w')
+                    state = 24;
+                else
+                    error();
+                break;
+
+            case 24:
+                if (bite == ' ')
+                    { 
+                        state = 3;
+                        command = 2;
+                    }
+                else
+                    error();
+                break;
+            
+            case 3:
+                if(bite == '\n')
+                    state = 4;
+                else if(count_buf >= 255)
+                    error();
+                else
+                   {
+                       filename_buf[count_buf] = bite;
+                       count_buf++;
+                   }
+
+            case 4:
+                if(command == 1)
+                    Serial.println("command = exists");
+                else if(command == 2)
+                    Serial.println("command = show");
+                else
+                    Serial.println("ääähhhhmmm nein");
+
+            default:
+                break;
+        }
+        // Serial.println(state);
+    }
 }
