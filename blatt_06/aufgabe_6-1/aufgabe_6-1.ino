@@ -11,9 +11,11 @@ uint8_t lcd_buf[6][84];
 
 const uint32_t max_filename_len = 255;
 char filename_buf[256];
-char bite;
-uint32_t state = 0;
-uint32_t fn_index = 0;
+volatile int command;
+volatile int count_buf = 0;
+volatile int8_t bite;
+volatile uint32_t state = 0;
+volatile uint32_t fn_index = 0;
 
 
 void set_pixel (uint8_t x, uint8_t y, int value)
@@ -73,8 +75,8 @@ void setup() {
 void error (void)
 {
     Serial.println(state);
-    Serial.println(bite);
-    Serial.println("bitte geben Sie einen gültigen Befehl ein");
+    Serial.println((int)bite);
+    Serial.println("bitte geben Sie einen gueltigen Befehl ein");
     while (bite != '\n')
         bite = Serial.read();
     state = 0;
@@ -82,14 +84,14 @@ void error (void)
 }
 
 void loop() {
-    int command = 0;
-    int count_buf = 0;
     while ((bite = Serial.read()) != -1)
     {
         switch(state)
         {
             case 0:
                 memset(filename_buf, 0x0, 256);
+                command = 0;
+                count_buf = 0;
                 if (bite == 'e')
                     state = 11;
                 else if (bite == 's')
@@ -176,7 +178,18 @@ void loop() {
             
             case 3:
                 if(bite == '\n')
-                    state = 4;
+                {
+                    Serial.print("filename = ");
+                    Serial.println(filename_buf);
+                    Serial.println("executing command");
+                    if(command == 1)
+                        Serial.println("command = exists");
+                    else if(command == 2)
+                        Serial.println("command = show");
+                    else
+                        Serial.println("aeaeaeahhhhmmm nein");
+                    state = 0;
+                }
                 else if(count_buf >= 255)
                     error();
                 else
@@ -184,14 +197,7 @@ void loop() {
                        filename_buf[count_buf] = bite;
                        count_buf++;
                    }
-
-            case 4:
-                if(command == 1)
-                    Serial.println("command = exists");
-                else if(command == 2)
-                    Serial.println("command = show");
-                else
-                    Serial.println("ääähhhhmmm nein");
+                break;
 
             default:
                 break;
