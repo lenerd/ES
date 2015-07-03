@@ -32,7 +32,7 @@ void invert_col (uint8_t x)
 
 int print_char(int x, int y, char value)
 {
-    if(!(x >= 0 && x <= 78 && y >= 0 && y < 40))
+    if(!(x >= 0 && x <= 78 && y >= 0 && y <= 40))
     {
         return -1;
     }
